@@ -1,65 +1,105 @@
+import { promises as fs } from 'fs';
+import path from 'path';
+import { ProgressCard } from '@/components/ProgressCard';
+import { Footer } from '@/components/Footer';
+import { RecruitmentSection } from '@/components/RecruitmentSection';
+
 import Image from "next/image";
 
-export default function Home() {
+interface ProgressData {
+  translation: number;
+  editing: number;
+  technical: number;
+  total: number;
+}
+
+async function getProgressData(): Promise<ProgressData> {
+  try {
+    const filePath = path.join(process.cwd(), 'public', 'progress-config.json');
+    const fileContents = await fs.readFile(filePath, 'utf8');
+    const data = JSON.parse(fileContents);
+    const total = Math.round((data.translation + data.editing + data.technical) / 3);
+
+    return {
+      ...data,
+      total,
+    };
+  } catch (error) {
+    console.error("Error reading progress config:", error);
+    return {
+      translation: 0,
+      editing: 0,
+      technical: 0,
+      total: 0,
+    };
+  }
+}
+
+export default async function Home() {
+  const data = await getProgressData();
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
+    <>
+      <div className="fixed inset-0 -z-50 w-full h-full">
         <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
+          src="/1500x941.webp"
+          alt="Background"
+          fill
+          className="object-cover opacity-60"
           priority
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+        <div className="absolute inset-0 bg-white/30" />
+      </div>
+
+      <main className="min-h-screen flex flex-col items-center justify-center py-20 px-4 md:px-8 relative z-0">
+
+
+        <div className="w-full max-w-[1200px] flex flex-col items-center z-10">
+          <header className="mb-16 text-center">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4 tracking-tight">
+              Tiến Độ Việt Hoá
+            </h1>
+            <p className="text-gray-500 text-lg md:text-xl max-w-2xl mx-auto">
+              Tiến độ của Dreamin' Her -Boku wa, Kanojo no Yume o Miru.-
+            </p>
+          </header>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 w-full">
+            <ProgressCard
+              title="Translation"
+              subtitle="Dịch thuật"
+              progress={data.translation}
+              imageSrc="/1.webp"
+              delay={0.1}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <ProgressCard
+              title="Editing"
+              subtitle="Biên tập"
+              progress={data.editing}
+              imageSrc="/2.webp"
+              delay={0.2}
+            />
+            <ProgressCard
+              title="Technical"
+              subtitle="Kỹ thuật"
+              progress={data.technical}
+              imageSrc="/3.webp"
+              delay={0.3}
+            />
+            <ProgressCard
+              title="Total Progress"
+              subtitle="Tổng tiến độ"
+              progress={data.total}
+              imageSrc="/4.webp"
+              delay={0.4}
+            />
+          </div>
+
+          <RecruitmentSection delay={0.5} />
         </div>
+
+        <Footer />
       </main>
-    </div>
+    </>
   );
 }
